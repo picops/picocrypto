@@ -1,0 +1,7 @@
+# Build / install (pyproject.toml + build-system)
+setuptools>=80.9.0
+Cython
+picobuild @ git+ssh://git@github.com/ckirua/picobuild.git@main
+
+# Dev (pyproject.toml [dev])
+pytest>=8.0.0
