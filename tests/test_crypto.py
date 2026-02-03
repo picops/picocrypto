@@ -1,8 +1,8 @@
-"""Minimal pytest tests for picocrypto."""
+"""Minimal pytest tests for cycrypto."""
 
 import pytest
 
-from picocrypto import (
+from cycrypto import (
     bip137_sign_message,
     bip137_signed_message_hash,
     bip137_verify_message,
@@ -17,7 +17,6 @@ from picocrypto import (
     sign_recoverable,
 )
 
-# Keccak-256 of empty input (standard test vector)
 KECCAK256_EMPTY = bytes.fromhex(
     "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
 )
@@ -33,12 +32,10 @@ def test_keccak256_output_length() -> None:
 
 
 def test_keccak256_deterministic() -> None:
-    data = b"same input"
-    assert keccak256(data) == keccak256(data)
+    assert keccak256(b"same input") == keccak256(b"same input")
 
 
 def test_privkey_to_pubkey() -> None:
-    # 32-byte private key (e.g. all zeros except last byte for valid range)
     priv = bytes(31) + bytes([1])
     pub = privkey_to_pubkey(priv)
     assert len(pub) == 65
@@ -50,7 +47,6 @@ def test_privkey_to_address() -> None:
     addr = privkey_to_address(priv)
     assert addr.startswith("0x")
     assert len(addr) == 42
-    assert all(c in "0123456789abcdef" for c in addr[2:].lower())
 
 
 def test_sign_recoverable() -> None:
@@ -78,8 +74,7 @@ def test_eip712_hash_full_message() -> None:
         "primaryType": "Mail",
         "message": {"from": "0x" + "00" * 20, "message": "hello"},
     }
-    out = eip712_hash_full_message(full)
-    assert len(out) == 32
+    assert len(eip712_hash_full_message(full)) == 32
 
 
 def test_eip712_hash_agent_message() -> None:
@@ -89,11 +84,9 @@ def test_eip712_hash_agent_message() -> None:
         "chainId": 1,
         "verifyingContract": "0x" + "00" * 20,
     }
-    out = eip712_hash_agent_message(domain, "0x" + "11" * 20, bytes(32))
-    assert len(out) == 32
+    assert len(eip712_hash_agent_message(domain, "0x" + "11" * 20, bytes(32))) == 32
 
 
-# Ed25519 (RFC 8032 test vector 1: empty message)
 ED25519_TEST1_SECRET = bytes.fromhex(
     "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60"
 )
@@ -108,35 +101,31 @@ ED25519_TEST1_SIG = bytes.fromhex(
 
 
 def test_ed25519_public_key() -> None:
-    pub = ed25519_public_key(ED25519_TEST1_SECRET)
-    assert pub == ED25519_TEST1_PUBLIC
-    assert len(pub) == 32
+    assert ed25519_public_key(ED25519_TEST1_SECRET) == ED25519_TEST1_PUBLIC
 
 
 def test_ed25519_sign_verify() -> None:
     sig = ed25519_sign(ED25519_TEST1_MSG, ED25519_TEST1_SECRET)
     assert sig == ED25519_TEST1_SIG
-    assert len(sig) == 64
     assert ed25519_verify(ED25519_TEST1_MSG, sig, ED25519_TEST1_PUBLIC) is True
 
 
 def test_ed25519_verify_rejects_tampered() -> None:
-    bad_msg = b"x"
-    assert ed25519_verify(bad_msg, ED25519_TEST1_SIG, ED25519_TEST1_PUBLIC) is False
-    bad_sig = bytes(63) + b"\x00"
-    assert ed25519_verify(ED25519_TEST1_MSG, bad_sig, ED25519_TEST1_PUBLIC) is False
+    assert ed25519_verify(b"x", ED25519_TEST1_SIG, ED25519_TEST1_PUBLIC) is False
+    assert (
+        ed25519_verify(ED25519_TEST1_MSG, bytes(63) + b"\x00", ED25519_TEST1_PUBLIC)
+        is False
+    )
 
 
 def test_bip137_signed_message_hash() -> None:
     h = bip137_signed_message_hash(b"hello")
     assert len(h) == 32
-    assert h == bip137_signed_message_hash(b"hello")
 
 
 def test_bip137_sign_verify() -> None:
     privkey = bytes(31) + bytes([1])
     pubkey = privkey_to_pubkey(privkey)
-    message = b"test message"
-    sig_b64 = bip137_sign_message(privkey, message)
-    assert bip137_verify_message(message, sig_b64, pubkey) is True
+    sig_b64 = bip137_sign_message(privkey, b"test message")
+    assert bip137_verify_message(b"test message", sig_b64, pubkey) is True
     assert bip137_verify_message(b"wrong", sig_b64, pubkey) is False

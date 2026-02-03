@@ -1,6 +1,5 @@
 """
-Ethereum-style crypto: keccak256, secp256k1, EIP-712. No eth_account dependency.
-Pure Python for now; can be cythonized later (e.g. keccak.py -> keccak.pyx).
+Ethereum-style crypto: keccak256, secp256k1, EIP-712. Curves in Cython.
 """
 
 from .__about__ import __version__

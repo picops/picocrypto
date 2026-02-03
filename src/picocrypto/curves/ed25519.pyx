@@ -2,6 +2,7 @@
 
 import hashlib
 
+
 cdef object _P = 2**255 - 19
 cdef object _L = 2**252 + 27742317777372353535851937790883648493
 cdef object _D = (-121665 * pow(121666, _P - 2, _P)) % _P

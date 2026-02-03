@@ -1,5 +1,5 @@
 """
-Keccak-256 (multirate padding, 256-bit output). Pure Python; can be cythonized later.
+Keccak-256 (multirate padding, 256-bit output). Pure Python.
 """
 
 from __future__ import annotations
@@ -44,45 +44,30 @@ _ROTATION = [
 
 
 def _rol64(v: int, n: int) -> int:
-    """Rotate 64-bit value v left by n bits (mod 64)."""
     n = n % 64
     return ((v << n) | (v >> (64 - n))) & 0xFFFFFFFFFFFFFFFF
 
 
 def _keccak_f(state: list[list[int]]) -> None:
-    """Keccak-f permutation; updates state in place (24 rounds)."""
     for rc in _ROUND_CONSTANTS:
-        # theta
         c = [reduce(xor, state[x]) for x in range(5)]
         d = [_rol64(c[(x + 1) % 5], 1) ^ c[(x - 1) % 5] for x in range(5)]
         for x in range(5):
             for y in range(5):
                 state[x][y] ^= d[x]
-        # rho and pi
         b = [[0] * 5 for _ in range(5)]
         for x in range(5):
             for y in range(5):
                 b[y][(2 * x + 3 * y) % 5] = _rol64(state[x][y], _ROTATION[y][x])
-        # chi
         for x in range(5):
             for y in range(5):
                 state[x][y] = b[x][y] ^ ((~b[(x + 1) % 5][y]) & b[(x + 2) % 5][y])
-        # iota
         state[0][0] ^= rc
 
 
 def keccak256(data: bytes) -> bytes:
-    """
-    Keccak-256 hash (256-bit output, multirate padding).
-
-    Args:
-        data: Input bytes (any length).
-
-    Returns:
-        32-byte digest.
-    """
-    rate_bytes = 1088 // 8  # 136
-    lanes_per_block = rate_bytes // 8  # 17
+    rate_bytes = 1088 // 8
+    lanes_per_block = rate_bytes // 8
     state = [[0] * 5 for _ in range(5)]
     lane_bytes = 8
     if len(data) % rate_bytes != 0 or len(data) == 0:

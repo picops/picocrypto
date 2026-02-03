@@ -1,12 +1,9 @@
-"""
-Minimal msgpack pack (dict, list, str, int, bool). Preserves dict order.
-"""
+"""Minimal msgpack pack (dict, list, str, int, bool). Preserves dict order."""
 
 from __future__ import annotations
 
 
 def _msgpack_pack_obj(obj, buf: bytearray) -> None:
-    """Append msgpack encoding of obj to buf (dict/list/str/int/bool/bytes/None)."""
     if obj is None:
         buf.append(0xC0)
     elif isinstance(obj, bool):
@@ -96,15 +93,6 @@ def _msgpack_pack_obj(obj, buf: bytearray) -> None:
 
 
 def msgpack_pack(obj) -> bytes:
-    """
-    Minimal msgpack encode for dict/list/str/int/bool/bytes/None. Preserves dict order.
-
-    Args:
-        obj: Value to encode (dict, list, str, int, bool, bytes, or None).
-
-    Returns:
-        Msgpack-encoded bytes.
-    """
     buf = bytearray()
     _msgpack_pack_obj(obj, buf)
     return bytes(buf)

@@ -1,6 +1,4 @@
-"""
-Elliptic-curve crypto: secp256k1 (Ethereum/Bitcoin), Ed25519 (Solana etc.).
-"""
+"""Elliptic-curve crypto: secp256k1 (Ethereum/Bitcoin), Ed25519 (Solana etc.)."""
 
 from .ed25519 import ed25519_public_key, ed25519_sign, ed25519_verify
 from .secp256k1 import (

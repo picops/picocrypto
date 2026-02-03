@@ -1,4 +1,4 @@
-"""Hash functions: Keccak-256 and future algorithms."""
+"""Hash functions: Keccak-256."""
 
 from .keccak import keccak256
 

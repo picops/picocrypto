@@ -13,13 +13,15 @@ _CY_SRC = os.path.join(_REPO_ROOT, "src")
 if _CY_SRC not in sys.path:
     sys.path.insert(0, _CY_SRC)
 
-import cycrypto.curves.secp256k1 as secp
 import cycrypto.curves.ed25519 as ed
+import cycrypto.curves.secp256k1 as secp
 from cycrypto.hashes import keccak256
 
 SECP_PRIV = bytes(31) + bytes([1])
 MSG_HASH = keccak256(b"message to sign")
-ED25519_SECRET = bytes.fromhex("9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60")
+ED25519_SECRET = bytes.fromhex(
+    "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60"
+)
 ED25519_MSG = b"profile message for ed25519"
 
 
@@ -52,8 +54,14 @@ def main() -> int:
     ap.add_argument("--ed25519", action="store_true")
     ap.add_argument("-n", type=int, default=None)
     ap.add_argument("-o", "--output", metavar="FILE")
-    ap.add_argument("--sort", default="cumtime", choices=("cumtime", "tottime", "calls", "name"))
-    ap.add_argument("--workload-only", action="store_true", help="Just run workload (for py-spy/scalene)")
+    ap.add_argument(
+        "--sort", default="cumtime", choices=("cumtime", "tottime", "calls", "name")
+    )
+    ap.add_argument(
+        "--workload-only",
+        action="store_true",
+        help="Just run workload (for py-spy/scalene)",
+    )
     args = ap.parse_args()
     if not args.secp256k1 and not args.ed25519:
         args.secp256k1 = args.ed25519 = True

@@ -1,21 +1,17 @@
 PYTHON := python
 PIP := pip
-PACKAGES := picolib
 TEST_DIR := tests
 .DEFAULT_GOAL := help
 
 .PHONY: build clean install test
 
-
 help:
-	@echo "Welcome to the Picolib Makefile"
-	@echo "Available commands:"
-	@echo "  help       - Show this help message"
-	@echo "  build      - Build the package"
-	@echo "  clean      - Clean the build and dist directories"
-	@echo "  install    - Install the package"
-	@echo "  test       - Run pytest on $(TEST_DIR)/"
-		
+	@echo "picocrypto Makefile"
+	@echo "  build   - Build Cython extensions in place"
+	@echo "  clean   - Clean build and dist"
+	@echo "  install - Install package editable"
+	@echo "  test    - Run pytest"
+
 install:
 	@$(PIP) install -e . --no-build-isolation
 
