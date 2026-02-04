@@ -96,10 +96,15 @@ cdef bytes _eip712_encode_field(dict types, str name, str type_, object value):
 
 
 cdef bytes _eip712_encode_data(str type_name, dict types, dict data):
-    out = bytearray(_eip712_hash_type(type_name, types))
-    for field in types[type_name]:
-        enc = _eip712_encode_field(types, field["name"], field["type"], data.get(field["name"]))
-        out += enc
+    cdef list fields = types[type_name]
+    cdef int n = len(fields)
+    cdef bytearray out = bytearray(32 + 32 * n)
+    cdef int i
+    out[0:32] = _eip712_hash_type(type_name, types)
+    for i in range(n):
+        out[32 * (i + 1) : 32 * (i + 2)] = _eip712_encode_field(
+            types, fields[i]["name"], fields[i]["type"], data.get(fields[i]["name"])
+        )
     return bytes(out)
 
 
@@ -140,28 +145,25 @@ _AGENT_TYPEHASH = keccak256(b"Agent(string source,bytes32 connectionId)")
 
 
 cdef bytes _eip712_hash_domain(dict domain):
-    enc = bytearray()
-    enc += keccak256(domain["name"].encode("utf-8"))
-    enc += keccak256(domain["version"].encode("utf-8"))
-    enc += int(domain["chainId"]).to_bytes(32, "big")
+    enc = (
+        keccak256(domain["name"].encode("utf-8"))
+        + keccak256(domain["version"].encode("utf-8"))
+        + int(domain["chainId"]).to_bytes(32, "big")
+    )
     addr = domain["verifyingContract"]
     if isinstance(addr, str):
         addr = addr[2:] if addr.startswith("0x") else addr
         addr = bytes.fromhex(addr)
-    enc += addr.rjust(32, b"\x00")
-    return keccak256(_EIP712_DOMAIN_TYPEHASH + bytes(enc))
+    enc = enc + addr.rjust(32, b"\x00")
+    return keccak256(_EIP712_DOMAIN_TYPEHASH + enc)
 
 
-cdef bytes _eip712_hash_agent(dict message):
-    enc = bytearray()
-    enc += keccak256(message["source"].encode("utf-8"))
-    conn = message["connectionId"]
-    conn = conn if isinstance(conn, bytes) else bytes(conn)
-    enc += conn.ljust(32, b"\x00")[:32]
-    return keccak256(_AGENT_TYPEHASH + bytes(enc))
+cdef bytes _eip712_hash_agent(str source, bytes connection_id):
+    enc = _AGENT_TYPEHASH + keccak256(source.encode("utf-8")) + connection_id.ljust(32, b"\x00")[:32]
+    return keccak256(enc)
 
 
 cpdef bytes eip712_hash_agent_message(object domain, str source, bytes connection_id):
     domain_sep = _eip712_hash_domain(domain)
-    msg_hash = _eip712_hash_agent({"source": source, "connectionId": connection_id})
+    msg_hash = _eip712_hash_agent(source, connection_id)
     return keccak256(b"\x19\x01" + domain_sep + msg_hash)

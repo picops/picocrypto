@@ -46,6 +46,7 @@ cythonized_extensions = cythonize(
                 "-Wno-unused-function",
                 "-Wno-unused-variable",
             ],
+            libraries=["crypto"],
             language="c",
         ),
     ],

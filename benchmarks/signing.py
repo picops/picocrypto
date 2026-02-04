@@ -42,8 +42,8 @@ except ImportError:
 
 from picocrypto import privkey_to_pubkey
 
-N_TIME = 500
-N_MEM = 200
+N_TIME = 300  # enough for stable time ratios
+N_MEM = 20  # small for quick memory peek
 PRIV = bytes(31) + bytes([1])
 PUB = privkey_to_pubkey(PRIV)
 MSG = b"bench message for BIP-137"
