@@ -24,9 +24,9 @@ for path in (_CY_SRC, _PICO_SRC):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-import cycrypto.curves.ed25519 as cy_ed
-import cycrypto.curves.secp256k1 as cy_secp
-from cycrypto.hashes import keccak256
+import picocrypto.curves.ed25519 as cy_ed
+import picocrypto.curves.secp256k1 as cy_secp
+from picocrypto.hashes import keccak256
 
 try:
     import picocrypto.curves.ed25519 as py_ed
