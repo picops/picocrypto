@@ -1,5 +1,5 @@
 # cython: language_level=3
-"""Declarations for picocrypto.hashes.keccak_cy."""
+"""Declarations for picocrypto.hashes.keccak."""
 
 cdef extern from "stdint.h":
     ctypedef unsigned long long uint64_t
