@@ -1,0 +1,6 @@
+"""Stub for picocrypto.signing.eip712 (Cython)."""
+
+def eip712_hash_full_message(full_message: dict) -> bytes: ...
+def eip712_hash_agent_message(
+    domain: dict, source: str, connection_id: bytes
+) -> bytes: ...

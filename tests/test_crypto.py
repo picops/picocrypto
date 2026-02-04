@@ -1,8 +1,8 @@
-"""Minimal pytest tests for cycrypto."""
+"""Minimal pytest tests for picocrypto."""
 
 import pytest
 
-from cycrypto import (
+from picocrypto import (
     bip137_sign_message,
     bip137_signed_message_hash,
     bip137_verify_message,
@@ -12,8 +12,10 @@ from cycrypto import (
     eip712_hash_agent_message,
     eip712_hash_full_message,
     keccak256,
+    msgpack_pack,
     privkey_to_address,
     privkey_to_pubkey,
+    recover_pubkey,
     sign_recoverable,
 )
 
@@ -55,6 +57,18 @@ def test_sign_recoverable() -> None:
     r, s, v = sign_recoverable(priv, msg_hash)
     assert isinstance(r, int) and isinstance(s, int) and isinstance(v, int)
     assert v in (27, 28)
+
+
+def test_recover_pubkey() -> None:
+    priv = bytes(31) + bytes([1])
+    msg_hash = keccak256(b"message to sign")
+    r, s, v = sign_recoverable(priv, msg_hash)
+    recid = v - 27
+    recovered = recover_pubkey(msg_hash, r, s, recid)
+    assert len(recovered) == 65
+    assert recovered[0] == 0x04
+    expected_pub = privkey_to_pubkey(priv)
+    assert recovered == expected_pub
 
 
 def test_eip712_hash_full_message() -> None:
@@ -129,3 +143,25 @@ def test_bip137_sign_verify() -> None:
     sig_b64 = bip137_sign_message(privkey, b"test message")
     assert bip137_verify_message(b"test message", sig_b64, pubkey) is True
     assert bip137_verify_message(b"wrong", sig_b64, pubkey) is False
+
+
+def test_msgpack_pack_null() -> None:
+    assert msgpack_pack(None) == bytes([0xC0])
+
+
+def test_msgpack_pack_int() -> None:
+    assert msgpack_pack(0) == bytes([0])
+    assert msgpack_pack(42) == bytes([42])
+    assert msgpack_pack(-1) == bytes([0xFF])
+
+
+def test_msgpack_pack_str() -> None:
+    packed = msgpack_pack("hello")
+    assert packed[0] == 0xA0 | 5
+    assert packed[1:6] == b"hello"
+
+
+def test_msgpack_pack_dict() -> None:
+    packed = msgpack_pack({"a": 1, "b": 2})
+    assert len(packed) > 0
+    assert packed[0] == 0x80 | 2  # fixmap 2

@@ -1,6 +1,6 @@
 """secp256k1 (Bitcoin/Ethereum curve): key derivation, ECDSA sign, public key recovery."""
 
-from ..hashes import keccak256
+from ..hashes cimport keccak256
 
 
 cdef object _P = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F

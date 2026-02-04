@@ -15,6 +15,39 @@ cythonized_extensions = cythonize(
             ],
             language="c",
         ),
+        Extension(
+            "picocrypto.hashes.*",
+            ["src/picocrypto/hashes/*.pyx"],
+            extra_compile_args=[
+                "-O3",
+                "-march=native",
+                "-Wno-unused-function",
+                "-Wno-unused-variable",
+            ],
+            language="c",
+        ),
+        Extension(
+            "picocrypto.serde.*",
+            ["src/picocrypto/serde/*.pyx"],
+            extra_compile_args=[
+                "-O3",
+                "-march=native",
+                "-Wno-unused-function",
+                "-Wno-unused-variable",
+            ],
+            language="c",
+        ),
+        Extension(
+            "picocrypto.signing.*",
+            ["src/picocrypto/signing/*.pyx"],
+            extra_compile_args=[
+                "-O3",
+                "-march=native",
+                "-Wno-unused-function",
+                "-Wno-unused-variable",
+            ],
+            language="c",
+        ),
     ],
     compiler_directives={
         "language_level": 3,

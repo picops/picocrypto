@@ -1,6 +1,21 @@
 # Benchmarks
 
-Compare **cycrypto** (Cython curves) vs **picocrypto** (pure Python): `PYTHONPATH=src:../picocrypto/src python benchmarks/bench_curves.py`
+- **Curves:** Compare cycrypto (Cython) vs picocrypto (pure Python):  
+  `PYTHONPATH=src:../picocrypto/src python benchmarks/bench_curves.py`
+- **Keccak-256:** Compare pure Python vs Cython implementation:  
+  `PYTHONPATH=src python benchmarks/bench_keccak.py`  
+  (Requires built `keccak` extension in hashes.)
+- **msgpack pack:** Compare pure Python vs Cython implementation:  
+  `PYTHONPATH=src python benchmarks/bench_msgpack.py`  
+  (Requires built `msgpack_pack` extension in serde.)
+- **Signing (BIP-137, EIP-712):** Compare pure Python vs Cython implementation:  
+  `PYTHONPATH=src python benchmarks/bench_signing.py`  
+  (Requires built `bip137` / `eip712` extensions in signing.)
+
+## Example
+
+- **Keccak:** Uses whatever implementation is exposed as `keccak256` in `picocrypto.hashes`:  
+  `PYTHONPATH=src python benchmarks/example_keccak.py`
 
 ## Profiling
 

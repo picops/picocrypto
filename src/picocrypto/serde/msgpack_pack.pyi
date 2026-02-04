@@ -1,0 +1,3 @@
+"""Stub for picocrypto.serde.msgpack_pack_cy."""
+
+def msgpack_pack(obj: object) -> bytes: ...
