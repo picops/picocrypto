@@ -4,7 +4,7 @@ UV := uv
 TEST_DIR := tests
 .DEFAULT_GOAL := help
 
-.PHONY: build clean install test sync install-uv lock dist
+.PHONY: build clean install test sync install-uv lock dist upload
 
 help:
 	@echo "picocrypto Makefile"
@@ -16,9 +16,13 @@ help:
 	@echo "  install-uv - uv: sync, build, then editable install (no-build-isolation)"
 	@echo "  lock       - uv: update uv.lock from pyproject.toml"
 	@echo "  dist       - sync + build sdist + wheel for PyPI"
+	@echo "  upload     - upload dist/* to PyPI (requires: make dist, twine/uv, credentials)"
 
 dist: sync
 	@$(UV) run python -m build
+
+upload:
+	@$(UV) run twine upload dist/*
 
 install:
 	@$(PIP) install -e . --no-build-isolation

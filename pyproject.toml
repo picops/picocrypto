@@ -25,7 +25,7 @@ dependencies = [
 dev = ["pytest>=8.0.0"]
 
 [dependency-groups]
-dev = ["pytest>=8.0.0", "build"]
+dev = ["pytest>=8.0.0", "build", "twine"]
 
 [tool.setuptools]
 include-package-data = true
