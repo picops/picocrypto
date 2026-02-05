@@ -24,6 +24,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8.0.0"]
 
+[dependency-groups]
+dev = ["pytest>=8.0.0", "build"]
+
 [tool.setuptools]
 include-package-data = true
 

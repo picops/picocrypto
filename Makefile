@@ -1,16 +1,24 @@
 PYTHON := python
 PIP := pip
+UV := uv
 TEST_DIR := tests
 .DEFAULT_GOAL := help
 
-.PHONY: build clean install test
+.PHONY: build clean install test sync install-uv lock dist
 
 help:
 	@echo "picocrypto Makefile"
-	@echo "  build   - Build Cython extensions in place"
-	@echo "  clean   - Clean build and dist"
-	@echo "  install - Install package editable"
-	@echo "  test    - Run pytest"
+	@echo "  build      - Build Cython extensions in place"
+	@echo "  clean      - Clean build and dist"
+	@echo "  install    - Install package editable (pip)"
+	@echo "  test       - Run pytest"
+	@echo "  sync       - uv: create venv and install deps from lockfile"
+	@echo "  install-uv - uv: sync, build, then editable install (no-build-isolation)"
+	@echo "  lock       - uv: update uv.lock from pyproject.toml"
+	@echo "  dist       - sync + build sdist + wheel for PyPI"
+
+dist: sync
+	@$(UV) run python -m build
 
 install:
 	@$(PIP) install -e . --no-build-isolation
@@ -27,3 +35,13 @@ clean:
 
 test:
 	@$(PYTHON) -m pytest $(TEST_DIR)/ -v
+
+sync:
+	@$(UV) sync --extra dev
+
+install-uv: sync
+	@$(MAKE) build
+	@$(UV) pip install -e . --no-build-isolation
+
+lock:
+	@$(UV) lock

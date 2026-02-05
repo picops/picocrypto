@@ -68,6 +68,6 @@ if __name__ == "__main__":
         description="Picocrypto cryptography utilities",
         packages=find_packages(where="src"),
         package_dir={"": "src"},
-        package_data={"picocrypto": ["**/*.pxd", "**/*.pxi"]},
+        package_data={"picocrypto": ["**/*.pxd", "**/*.pxi", "**/*.pyx"]},
         ext_modules=cythonized_extensions,
     )
