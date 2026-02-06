@@ -1,0 +1,45 @@
+# Publish to PyPI on push of a version tag (e.g. v0.0.1).
+# One-time setup: On PyPI, add a Trusted Publisher for this repo:
+#   https://pypi.org/manage/project/picocrypto/settings/publishing/
+#   Owner: your-org, Repository: picocrypto, Workflow: publish.yml
+#
+# If picobuild is a private repo, add secret SSH_PRIVATE_KEY (deploy key) and
+# the "Setup SSH for private deps" step will use it.
+
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  pypi-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # required for Trusted Publishing
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH for private deps (optional)
+        if: ${{ secrets.SSH_PRIVATE_KEY != '' }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.14 || uv python install 3.13
+
+      - name: Build sdist and wheel
+        run: make dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

@@ -1,0 +1,3 @@
+"""Stub for picocrypto.hashes.keccak_cy."""
+
+def keccak256(data: bytes) -> bytes: ...

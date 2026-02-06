@@ -1,0 +1,34 @@
+[build-system]
+requires = [
+    "setuptools",
+    "wheel",
+    "Cython",
+    "picobuild @ git+ssh://git@github.com/ckirua/picobuild.git@main"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "picocrypto"
+description = "Picocrypto cryptography utilities"
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+authors = [{ name = "ckirua", email = "aquipongoalgo.dsz@gmail.com" }]
+requires-python = ">=3.13"
+dynamic = ["version"]
+dependencies = [
+    "setuptools>=80.9.0",
+    "Cython",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0"]
+
+[dependency-groups]
+dev = ["pytest>=8.0.0", "build", "twine"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = { attr = "picocrypto.__about__.__version__" }
