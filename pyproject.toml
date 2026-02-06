@@ -3,7 +3,7 @@ requires = [
     "setuptools",
     "wheel",
     "Cython",
-    "picobuild @ git+ssh://git@github.com/ckirua/picobuild.git@main"
+    "picobuild"
 ]
 build-backend = "setuptools.build_meta"
 
