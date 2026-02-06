@@ -1,9 +1,6 @@
 # Publish to PyPI when a GitHub Release is published.
 # Builds sdist + wheel for Python 3.13 and 3.14 (multi-version dist/), then publishes.
 # One-time: Add Trusted Publisher on PyPI for this repo (workflow: python-publish.yml).
-#
-# If picobuild is a private repo, add secret SSH_PRIVATE_KEY (deploy key) and
-# the "Setup SSH for private deps" step will use it.
 
 name: Upload Python Package
 
@@ -20,14 +17,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup SSH for private deps (optional)
-        if: ${{ secrets.SSH_PRIVATE_KEY != '' }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
