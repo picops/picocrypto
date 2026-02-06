@@ -19,7 +19,7 @@ help:
 	@echo "  upload     - upload dist/* to PyPI (requires: make dist, twine/uv, credentials)"
 
 dist: sync
-	@$(UV) run python -m build
+	@$(UV) run python -m build --outdir dist
 
 upload:
 	@$(UV) run twine upload dist/*
