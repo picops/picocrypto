@@ -1,7 +1,7 @@
 # Build / install (pyproject.toml + build-system)
 setuptools>=80.9.0
 Cython
-picobuild
+picobuild==0.0.5b1
 
 # Dev (pyproject.toml [dev])
 pytest>=8.0.0

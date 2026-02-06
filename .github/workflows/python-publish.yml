@@ -23,19 +23,19 @@ jobs:
         with:
           version: "latest"
 
-      - name: Set up Python
-        run: uv python install 3.14
-
-      - name: Build sdist
-        run: uv run python -m build --sdist --outdir dist
-
       - name: Build manylinux wheels
         uses: pypa/cibuildwheel@v3.3.1
         env:
           CIBW_BUILD: "cp313-* cp314-*"
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.13"
+          CIBW_BEFORE_BUILD_LINUX: "command -v dnf >/dev/null && dnf install -y openssl-devel || command -v yum >/dev/null && yum install -y openssl-devel || apk add --no-cache openssl-dev"
         with:
           output-dir: dist
+
+      - name: Set up Python and build sdist
+        run: |
+          uv python install 3.14
+          uv run python -m build --sdist --outdir dist
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4

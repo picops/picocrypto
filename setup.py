@@ -1,6 +1,4 @@
-from Cython.Build import cythonize
-from picobuild import get_cython_build_dir
-from setuptools import Extension, find_packages, setup
+from picobuild import Extension, cythonize, find_packages, get_cython_build_dir, setup
 
 cythonized_extensions = cythonize(
     [
