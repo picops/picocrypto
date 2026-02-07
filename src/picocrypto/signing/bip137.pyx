@@ -1,7 +1,9 @@
 """BIP-137 signed messages. Cython implementation (used by default)."""
 
 from cpython.bytes cimport PyBytes_AS_STRING, PyBytes_FromStringAndSize
+
 from ..curves cimport recover_pubkey, sign_recoverable
+
 
 cdef extern from "openssl/sha.h":
     unsigned char* SHA256(const unsigned char *data, size_t count, unsigned char *md)

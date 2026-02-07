@@ -1,18 +1,25 @@
 """
-Benchmark msgpack pack: pure Python (msgpack_pack) vs Cython (msgpack_pack_cy).
+Benchmark msgpack pack (serde default and msgpack_pack_2).
 Compares time per call and peak memory (tracemalloc) per run.
+
+Timing uses multiple runs and median for more consistent results; warmup reduces
+cold-cache effects. Use --iter, --warmup, --runs to tune.
 
 Run from repo root:
 
-  PYTHONPATH=src python benchmarks/bench_msgpack.py
+  PYTHONPATH=src python benchmarks/msgpack.py
+  PYTHONPATH=src python benchmarks/msgpack.py --impl v2,v3
+  PYTHONPATH=src python benchmarks/msgpack.py --iter 5000 --runs 7   # slower, more stable
 
 Or after pip install -e .:
 
-  python benchmarks/bench_msgpack.py
+  python benchmarks/msgpack.py
 """
 
 from __future__ import annotations
 
+import argparse
+import gc
 import os
 import sys
 import time
@@ -23,14 +30,25 @@ _src = os.path.join(_root, "src")
 if _src not in sys.path:
     sys.path.insert(0, _src)
 
-from picocrypto.serde import msgpack_pack as msgpack_pack_cy
-from picocrypto.serde._msgpack_pack import msgpack_pack as msgpack_pack_py
 
-if msgpack_pack_py is None:
-    print(
-        "msgpack_pack_py not available (extension not built). Run: make build install"
-    )
-    sys.exit(1)
+def _load_implementations() -> list[tuple[str, str, object]]:
+    """(id, label, msgpack_pack callable). Order defines baseline (first) for speedup/ratio."""
+    impls: list[tuple[str, str, object]] = []
+
+    def _try_loader(modname: str, label: str, id_: str):
+        try:
+            mod = __import__(modname, fromlist=["msgpack_pack"])
+            fn = getattr(mod, "msgpack_pack", None)
+            impls.append((id_, label, fn))
+        except Exception:
+            impls.append((id_, label, None))
+
+    # Serde default (msgpack_pack)
+    _try_loader("picocrypto.serde.msgpack_pack", "serde (default)", "cy")
+    # msgpack_pack_2
+    _try_loader("picocrypto.serde.msgpack_pack_2", "msgpack_pack_2", "v2")
+    return impls
+
 
 # Sample payloads: various shapes and sizes
 SAMPLES: list[tuple[object, str]] = [
@@ -49,26 +67,48 @@ SAMPLES: list[tuple[object, str]] = [
 
 N_TIME = 2000
 N_MEM = 500
+WARMUP_DEFAULT = 200
+TIMING_RUNS_DEFAULT = 5
 
 
-def _n_time(_payload: object) -> int:
-    return N_TIME
-
-
-def _n_mem(_payload: object) -> int:
-    return N_MEM
-
-
-def _time_per_call(fn, payload: object, n: int, warmup: int = 20) -> float:
+def _time_per_call_median(
+    fn: object,
+    payload: object,
+    n: int,
+    warmup: int = WARMUP_DEFAULT,
+    runs: int = TIMING_RUNS_DEFAULT,
+    disable_gc: bool = True,
+) -> tuple[float, float]:
+    """
+    Return (median time per call in seconds, std in seconds) for more consistent timing.
+    Runs warmup, then `runs` timing loops of `n` iterations each; median of per-run
+    mean time is used to reduce impact of outliers (GC, scheduling).
+    """
     for _ in range(warmup):
         fn(payload)
-    start = time.perf_counter()
-    for _ in range(n):
-        fn(payload)
-    return (time.perf_counter() - start) / n
+    run_times: list[float] = []
+    was_enabled = gc.isenabled()
+    if disable_gc:
+        gc.disable()
+    try:
+        for _ in range(runs):
+            start = time.perf_counter()
+            for _ in range(n):
+                fn(payload)
+            elapsed = time.perf_counter() - start
+            run_times.append(elapsed / n)
+    finally:
+        if disable_gc and was_enabled:
+            gc.enable()
+    run_times.sort()
+    median = run_times[runs // 2]
+    mean = sum(run_times) / runs
+    variance = sum((t - mean) ** 2 for t in run_times) / runs
+    std = variance**0.5
+    return median, std
 
 
-def _peak_memory_kb(fn, payload: object, n: int) -> float:
+def _peak_memory_kb(fn: object, payload: object, n: int) -> float:
     tracemalloc.start()
     if hasattr(tracemalloc, "reset_peak"):
         tracemalloc.reset_peak()
@@ -80,59 +120,172 @@ def _peak_memory_kb(fn, payload: object, n: int) -> float:
 
 
 def main() -> None:
-    print("Benchmark: msgpack_pack  pure Python vs Cython")
-    print("  (msgpack_pack.msgpack_pack vs msgpack_pack_cy.msgpack_pack)")
+    parser = argparse.ArgumentParser(
+        description="Benchmark msgpack_pack implementations"
+    )
+    parser.add_argument(
+        "--impl",
+        default="all",
+        metavar="IDS",
+        help="Comma-separated impl ids to run (e.g. cy,v2,v3) or 'all' (default)",
+    )
+    parser.add_argument(
+        "--iter",
+        type=int,
+        default=N_TIME,
+        metavar="N",
+        help=f"Iterations per timing run (default {N_TIME}); higher = more stable",
+    )
+    parser.add_argument(
+        "--warmup",
+        type=int,
+        default=WARMUP_DEFAULT,
+        metavar="N",
+        help=f"Warmup iterations before each timing run (default {WARMUP_DEFAULT})",
+    )
+    parser.add_argument(
+        "--runs",
+        type=int,
+        default=TIMING_RUNS_DEFAULT,
+        metavar="N",
+        help=f"Number of timing runs per impl/payload; median is used (default {TIMING_RUNS_DEFAULT})",
+    )
+    parser.add_argument(
+        "--no-disable-gc",
+        action="store_true",
+        help="Do not disable GC during timing (can make results noisier)",
+    )
+    parser.add_argument(
+        "--show-std",
+        action="store_true",
+        help="Show ± std in time table (spread across runs)",
+    )
+    args = parser.parse_args()
+    n_time = max(1, args.iter)
+    warmup = max(0, args.warmup)
+    runs = max(1, args.runs)
+    disable_gc = not args.no_disable_gc
+    show_std = args.show_std
+
+    all_impls = _load_implementations()
+    if args.impl.strip().lower() == "all":
+        impls = [(i, label, fn) for i, label, fn in all_impls if fn is not None]
+    else:
+        requested = {s.strip().lower() for s in args.impl.split(",") if s.strip()}
+        impls = [
+            (i, label, fn)
+            for i, label, fn in all_impls
+            if i in requested and fn is not None
+        ]
+
+    if not impls:
+        print(
+            "No implementations available or selected. Check --impl and that extensions are built."
+        )
+        sys.exit(1)
+
+    ids = [x[0] for x in impls]
+    labels = [x[1] for x in impls]
+    fns = [x[2] for x in impls]
+    baseline_fn = fns[0]
+    baseline_label = labels[0]
+
+    print("Benchmark: msgpack_pack implementations")
+    print("  " + ", ".join(labels))
+    print(
+        f"  Timing: n={n_time}, warmup={warmup}, runs={runs} (median), disable_gc={disable_gc}"
+    )
     print()
 
-    # Sanity: same output
-    for payload, label in SAMPLES[:5]:
-        a = msgpack_pack_py(payload)
-        b = msgpack_pack_cy(payload)
-        assert a == b, f"{label}: mismatch {a!r} vs {b!r}"
+    # Sanity: same output across all
+    for payload, sample_label in SAMPLES[:5]:
+        ref = baseline_fn(payload)
+        for impl_id, impl_label, fn in impls:
+            if fn is baseline_fn:
+                continue
+            got = fn(payload)
+            assert (
+                ref == got
+            ), f"{sample_label} [{impl_label}]: mismatch {ref!r} vs {got!r}"
     print("  Sanity check: same bytes for sample payloads.")
     print()
 
-    print("  Time/memory: iterations scale per payload.")
-    print()
-
     # --- Time ---
-    print("  --- Time per call (ms) ---")
-    print(
-        f"  {'payload':<16} {'n':<6} {'Python (ms)':<14} {'Cython (ms)':<14} {'speedup':<10}"
-    )
-    print("  " + "-" * 64)
-    time_results: list[tuple[str, float, float, float]] = []
-    for payload, label in SAMPLES:
-        n = _n_time(payload)
-        t_py = _time_per_call(msgpack_pack_py, payload, n) * 1000
-        t_cy = _time_per_call(msgpack_pack_cy, payload, n) * 1000
-        speedup = t_py / t_cy if t_cy > 0 else 0
-        time_results.append((label, t_py, t_cy, speedup))
-        print(f"  {label:<16} {n:<6} {t_py:<14.4f} {t_cy:<14.4f} {speedup:.2f}x")
+    col_width = 14 if show_std else 12
+    header = f"  {'payload':<16} {'n':<6}"
+    for label in labels:
+        header += f" {label[: col_width - 4]:<{col_width}}"
+    print("  --- Time per call (ms, median over runs) ---")
+    print(header)
+    print("  " + "-" * (24 + len(labels) * (col_width + 1)))
+    time_results: list[list[float]] = []
+    time_stds: list[list[float]] = []  # per-cell std in ms
+    for payload, sample_label in SAMPLES:
+        row_medians: list[float] = []
+        row_stds: list[float] = []
+        for fn in fns:
+            median_sec, std_sec = _time_per_call_median(
+                fn, payload, n_time, warmup=warmup, runs=runs, disable_gc=disable_gc
+            )
+            row_medians.append(median_sec * 1000)
+            row_stds.append(std_sec * 1000)
+        time_results.append(row_medians)
+        time_stds.append(row_stds)
+        row_str = f"  {sample_label:<16} {n_time:<6}"
+        for i, t in enumerate(row_medians):
+            if show_std:
+                row_str += f" {t:.4f}±{row_stds[i]:.4f}"
+            else:
+                row_str += f" {t:<{col_width}.4f}"
+        print(row_str)
     print()
 
     # --- Memory ---
     print("  --- Peak memory (KiB) during run ---")
-    print(
-        f"  {'payload':<16} {'n':<6} {'Python (KiB)':<14} {'Cython (KiB)':<14} {'ratio':<10}"
-    )
-    print("  " + "-" * 64)
-    mem_results: list[tuple[str, float, float, float]] = []
-    for payload, label in SAMPLES:
-        n = _n_mem(payload)
-        mem_py = _peak_memory_kb(msgpack_pack_py, payload, n)
-        mem_cy = _peak_memory_kb(msgpack_pack_cy, payload, n)
-        ratio = mem_py / mem_cy if mem_cy > 0 else 0
-        mem_results.append((label, mem_py, mem_cy, ratio))
-        print(f"  {label:<16} {n:<6} {mem_py:<14.2f} {mem_cy:<14.2f} {ratio:.2f}x")
+    print(header)
+    print("  " + "-" * (24 + len(labels) * (col_width + 1)))
+    mem_results: list[list[float]] = []
+    for payload, sample_label in SAMPLES:
+        n = N_MEM
+        row_mem = []
+        for fn in fns:
+            row_mem.append(_peak_memory_kb(fn, payload, n))
+        mem_results.append(row_mem)
+        mem_baseline = row_mem[0]
+        row_str = f"  {sample_label:<16} {n:<6}"
+        for m in row_mem:
+            row_str += f" {m:<{col_width}.2f}"
+        print(row_str)
     print()
 
     # --- Summary ---
-    avg_speedup = sum(r[3] for r in time_results) / len(time_results)
-    avg_mem_ratio = sum(r[3] for r in mem_results) / len(mem_results)
+    n_payloads = len(SAMPLES)
     print("  --- Summary ---")
-    print(f"  Average time speedup (Cython vs Python): {avg_speedup:.2f}x")
-    print(f"  Average memory ratio (Python/Cython):   {avg_mem_ratio:.2f}x")
+    for idx, (impl_id, impl_label, _) in enumerate(impls):
+        avg_time_ms = sum(time_results[r][idx] for r in range(n_payloads)) / n_payloads
+        avg_mem_kb = sum(mem_results[r][idx] for r in range(n_payloads)) / n_payloads
+        speedup_vs_baseline = (
+            sum(time_results[r][0] / time_results[r][idx] for r in range(n_payloads))
+            / n_payloads
+            if idx > 0
+            else 1.0
+        )
+        mem_ratio = (
+            sum(mem_results[r][0] / mem_results[r][idx] for r in range(n_payloads))
+            / n_payloads
+            if idx > 0
+            else 1.0
+        )
+        print(
+            f"  [{impl_id}] {impl_label}: avg {avg_time_ms:.4f} ms, {avg_mem_kb:.2f} KiB",
+            end="",
+        )
+        if idx > 0:
+            print(
+                f"  | speedup vs baseline: {speedup_vs_baseline:.2f}x  mem ratio: {mem_ratio:.2f}x"
+            )
+        else:
+            print("  (baseline)")
 
 
 if __name__ == "__main__":

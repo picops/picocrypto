@@ -14,16 +14,9 @@ from __future__ import annotations
 
 import pytest
 
-from picocrypto import (
-    ed25519_public_key,
-    ed25519_sign,
-    ed25519_verify,
-    keccak256,
-    privkey_to_address,
-    privkey_to_pubkey,
-    recover_pubkey,
-    sign_recoverable,
-)
+from picocrypto import (ed25519_public_key, ed25519_sign, ed25519_verify,
+                        keccak256, privkey_to_address, privkey_to_pubkey,
+                        recover_pubkey, sign_recoverable)
 
 # --- secp256k1: locked-in outputs for fixed inputs (captured from current impl) ---
 SECP_PRIV = bytes.fromhex(
@@ -37,8 +30,12 @@ SECP_PUB_EXPECTED = bytes.fromhex(
     "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"
 )
 SECP_ADDR_EXPECTED = "0x7d6e99bb8abf8cc013bb0e912d0b176596fe7b88"
-SECP_R_EXPECTED = 2780594367940990599170980534274032790046949652926240393108138259367820360119
-SECP_S_EXPECTED = 14011065033942443886443251798395993059168771109101043339243150874103607391952
+SECP_R_EXPECTED = (
+    2780594367940990599170980534274032790046949652926240393108138259367820360119
+)
+SECP_S_EXPECTED = (
+    14011065033942443886443251798395993059168771109101043339243150874103607391952
+)
 SECP_V_EXPECTED = 28
 
 # --- Ed25519: RFC 8032 test vector (already in test_crypto; repeated for stability) ---
@@ -99,4 +96,7 @@ def test_ed25519_sign_stable() -> None:
 
 def test_ed25519_verify_stable() -> None:
     """Ed25519 verify must accept the RFC 8032 (message, sig, pub) triple."""
-    assert ed25519_verify(ED25519_MSG, ED25519_SIG_EXPECTED, ED25519_PUBLIC_EXPECTED) is True
+    assert (
+        ed25519_verify(ED25519_MSG, ED25519_SIG_EXPECTED, ED25519_PUBLIC_EXPECTED)
+        is True
+    )

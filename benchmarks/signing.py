@@ -24,17 +24,25 @@ if _src not in sys.path:
     sys.path.insert(0, _src)
 
 from picocrypto.signing._bip137 import bip137_sign_message as bip137_sign_py
-from picocrypto.signing._bip137 import bip137_signed_message_hash as bip137_hash_py
-from picocrypto.signing._bip137 import bip137_verify_message as bip137_verify_py
-from picocrypto.signing._eip712 import eip712_hash_agent_message as eip712_agent_py
-from picocrypto.signing._eip712 import eip712_hash_full_message as eip712_full_py
+from picocrypto.signing._bip137 import \
+    bip137_signed_message_hash as bip137_hash_py
+from picocrypto.signing._bip137 import \
+    bip137_verify_message as bip137_verify_py
+from picocrypto.signing._eip712 import \
+    eip712_hash_agent_message as eip712_agent_py
+from picocrypto.signing._eip712 import \
+    eip712_hash_full_message as eip712_full_py
 
 try:
     from picocrypto.signing.bip137 import bip137_sign_message as bip137_sign_cy
-    from picocrypto.signing.bip137 import bip137_signed_message_hash as bip137_hash_cy
-    from picocrypto.signing.bip137 import bip137_verify_message as bip137_verify_cy
-    from picocrypto.signing.eip712 import eip712_hash_agent_message as eip712_agent_cy
-    from picocrypto.signing.eip712 import eip712_hash_full_message as eip712_full_cy
+    from picocrypto.signing.bip137 import \
+        bip137_signed_message_hash as bip137_hash_cy
+    from picocrypto.signing.bip137 import \
+        bip137_verify_message as bip137_verify_cy
+    from picocrypto.signing.eip712 import \
+        eip712_hash_agent_message as eip712_agent_cy
+    from picocrypto.signing.eip712 import \
+        eip712_hash_full_message as eip712_full_cy
 
     HAS_CY = True
 except ImportError:
