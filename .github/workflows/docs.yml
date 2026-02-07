@@ -63,7 +63,8 @@ jobs:
             cp -r docs/_build/html site/latest
           fi
 
-          # Build each recent tag (v*)
+          # Build each recent tag (v*); return to main after each tag
+          ORIG_REF=$(git rev-parse HEAD)
           for tag in $TAGS; do
             ver=${tag#v}
             git checkout "$tag" 2>/dev/null || true
@@ -76,7 +77,7 @@ jobs:
               mkdir -p "site/$ver"
               cp -r docs/_build/html/* "site/$ver/"
             fi
-            git checkout -
+            git checkout "$ORIG_REF"
           done
 
           # Root index: version picker + redirect to latest
