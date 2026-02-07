@@ -23,7 +23,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0.0"]
+dev = ["pytest>=8.0.0", "sphinx>=7.0.0"]
 
 [dependency-groups]
 dev = ["pytest>=8.0.0", "build", "twine"]
