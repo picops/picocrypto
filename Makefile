@@ -25,10 +25,10 @@ upload:
 	@$(UV) run twine upload dist/*
 
 install:
-	@$(PIP) install -e . --no-build-isolation
+	@$(UV) pip install -e . --no-build-isolation
 
 build:
-	@$(PYTHON) setup.py build_ext --inplace
+	@$(UV) run python setup.py build_ext --inplace
 
 clean:
 	@rm -rf build/
@@ -38,7 +38,7 @@ clean:
 	@find . -type d -name "__pycache__" -exec rm -rf {} +
 
 test:
-	@$(PYTHON) -m pytest $(TEST_DIR)/ -v
+	@$(UV) run pytest $(TEST_DIR)/ -v
 
 sync:
 	@$(UV) sync --extra dev

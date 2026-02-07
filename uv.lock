@@ -334,10 +334,24 @@ wheels = [
 ]
 
 [[package]]
+name = "picobuild"
+version = "0.0.5b1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "setuptools" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7a/f3/fed377ce5057e4ce35119cfe126ca8a83999944418951fb8fc1f96a20a7a/picobuild-0.0.5b1.tar.gz", hash = "sha256:a02bf5c3541d0ca09091d10026fc30a7484d0f18c708e16a9ee6ad82f7d38f30", size = 6032, upload-time = "2026-02-06T17:01:23.366Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/16/70/b762ba638d8aa96a25da9e8ba00c97ac86849c36e4c504efc8ba2abdb70c/picobuild-0.0.5b1-py313-none-any.whl", hash = "sha256:92dd74e257264acbea95154f5a68b9aa87e08a25fff223b9bb22a50298da7cf7", size = 6270, upload-time = "2026-02-06T17:01:19.841Z" },
+    { url = "https://files.pythonhosted.org/packages/23/d6/eb6c0cd2f26e6ec4eb7b96926470d15d838f6dbf8d0ee3c8780a245581a5/picobuild-0.0.5b1-py314-none-any.whl", hash = "sha256:e44159236041899e03fc54854b32001e002be1c59a4d0c9edc1461213ac9dc3e", size = 6270, upload-time = "2026-02-06T17:01:21.535Z" },
+]
+
+[[package]]
 name = "picocrypto"
 source = { editable = "." }
 dependencies = [
     { name = "cython" },
+    { name = "picobuild" },
     { name = "setuptools" },
 ]
 
@@ -356,6 +370,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "cython" },
+    { name = "picobuild", specifier = "==0.0.5b1" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
     { name = "setuptools", specifier = ">=80.9.0" },
 ]
