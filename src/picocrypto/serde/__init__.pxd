@@ -1,8 +1,7 @@
 # cython: language_level=3
-"""Declarations for picocrypto.serde.msgpack_pack_2."""
+"""Declarations for picocrypto.serde."""
 
-from .msgpack_pack_2 cimport (_append_byte, _append_bytes, _ensure_capacity,
-                              _msgpack_pack_obj, _pack_uint16_be,
-                              _pack_uint32_be, _pack_uint64_be, msgpack_pack)
+from .msgpack_pack cimport msgpack_pack
+from .msgpack_pack_2 cimport msgpack_pack as msgpack_pack_2
 
-__all__: tuple[str, ...] = ("msgpack_pack", "_msgpack_pack_obj", "_ensure_capacity", "_append_byte", "_append_bytes", "_pack_uint16_be", "_pack_uint32_be", "_pack_uint64_be")
+__all__: tuple[str, ...] = ("msgpack_pack", "msgpack_pack_2")

@@ -1,4 +1,4 @@
-"""Stub for picocrypto.serde.msgpack_pack_2."""
+"""Stub for picocrypto.serde.msgpack_pack."""
 
 __all__: tuple[str, ...] = ("msgpack_pack",)
 

@@ -1,5 +1,5 @@
 """
-Benchmark msgpack pack across multiple implementations (serde default, _2, _v3, etc.).
+Benchmark msgpack pack (serde default and msgpack_pack_2).
 Compares time per call and peak memory (tracemalloc) per run.
 
 Timing uses multiple runs and median for more consistent results; warmup reduces
@@ -43,20 +43,10 @@ def _load_implementations() -> list[tuple[str, str, object]]:
         except Exception:
             impls.append((id_, label, None))
 
-    # Serde default (msgpack_pack from .msgpack_pack)
+    # Serde default (msgpack_pack)
     _try_loader("picocrypto.serde.msgpack_pack", "serde (default)", "cy")
     # msgpack_pack_2
     _try_loader("picocrypto.serde.msgpack_pack_2", "msgpack_pack_2", "v2")
-    # msgpack_pack_v3
-    _try_loader("picocrypto.serde.msgpack_pack_v3", "msgpack_pack_v3", "v3")
-    # Pure Python (optional)
-    _try_loader("picocrypto.serde._msgpack_pack", "Python (_msgpack_pack)", "py")
-    # msgpack_pack_v4
-    _try_loader("picocrypto.serde.msgpack_pack_v4", "msgpack_pack_v4", "v4")
-    # msgpack_pack_v5
-    _try_loader("picocrypto.serde.msgpack_pack_v5", "msgpack_pack_v5", "v5")
-    # msgpack_pack_v6
-    _try_loader("picocrypto.serde.msgpack_pack_v6", "msgpack_pack_v6", "v6")
     return impls
 
 
@@ -130,7 +120,9 @@ def _peak_memory_kb(fn: object, payload: object, n: int) -> float:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Benchmark msgpack_pack implementations")
+    parser = argparse.ArgumentParser(
+        description="Benchmark msgpack_pack implementations"
+    )
     parser.add_argument(
         "--impl",
         default="all",
@@ -180,10 +172,16 @@ def main() -> None:
         impls = [(i, label, fn) for i, label, fn in all_impls if fn is not None]
     else:
         requested = {s.strip().lower() for s in args.impl.split(",") if s.strip()}
-        impls = [(i, label, fn) for i, label, fn in all_impls if i in requested and fn is not None]
+        impls = [
+            (i, label, fn)
+            for i, label, fn in all_impls
+            if i in requested and fn is not None
+        ]
 
     if not impls:
-        print("No implementations available or selected. Check --impl and that extensions are built.")
+        print(
+            "No implementations available or selected. Check --impl and that extensions are built."
+        )
         sys.exit(1)
 
     ids = [x[0] for x in impls]
@@ -194,17 +192,21 @@ def main() -> None:
 
     print("Benchmark: msgpack_pack implementations")
     print("  " + ", ".join(labels))
-    print(f"  Timing: n={n_time}, warmup={warmup}, runs={runs} (median), disable_gc={disable_gc}")
+    print(
+        f"  Timing: n={n_time}, warmup={warmup}, runs={runs} (median), disable_gc={disable_gc}"
+    )
     print()
 
     # Sanity: same output across all
     for payload, sample_label in SAMPLES[:5]:
         ref = baseline_fn(payload)
-        for (impl_id, impl_label, fn) in impls:
+        for impl_id, impl_label, fn in impls:
             if fn is baseline_fn:
                 continue
             got = fn(payload)
-            assert ref == got, f"{sample_label} [{impl_label}]: mismatch {ref!r} vs {got!r}"
+            assert (
+                ref == got
+            ), f"{sample_label} [{impl_label}]: mismatch {ref!r} vs {got!r}"
     print("  Sanity check: same bytes for sample payloads.")
     print()
 
@@ -269,13 +271,19 @@ def main() -> None:
             else 1.0
         )
         mem_ratio = (
-            sum(mem_results[r][0] / mem_results[r][idx] for r in range(n_payloads)) / n_payloads
+            sum(mem_results[r][0] / mem_results[r][idx] for r in range(n_payloads))
+            / n_payloads
             if idx > 0
             else 1.0
         )
-        print(f"  [{impl_id}] {impl_label}: avg {avg_time_ms:.4f} ms, {avg_mem_kb:.2f} KiB", end="")
+        print(
+            f"  [{impl_id}] {impl_label}: avg {avg_time_ms:.4f} ms, {avg_mem_kb:.2f} KiB",
+            end="",
+        )
         if idx > 0:
-            print(f"  | speedup vs baseline: {speedup_vs_baseline:.2f}x  mem ratio: {mem_ratio:.2f}x")
+            print(
+                f"  | speedup vs baseline: {speedup_vs_baseline:.2f}x  mem ratio: {mem_ratio:.2f}x"
+            )
         else:
             print("  (baseline)")
 
