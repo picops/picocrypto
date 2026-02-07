@@ -24,7 +24,7 @@ if _src not in sys.path:
     sys.path.insert(0, _src)
 
 from picocrypto.serde import msgpack_pack as msgpack_pack_cy
-from picocrypto.serde._msgpack_pack import msgpack_pack as msgpack_pack_py
+from picocrypto.serde.msgpack_pack_2 import msgpack_pack as msgpack_pack_py
 
 if msgpack_pack_py is None:
     print(

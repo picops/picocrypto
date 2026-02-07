@@ -83,21 +83,15 @@ cdef void _msgpack_pack_obj(object obj, bytearray buf) except *:
         _append_byte(buf, 0xC3 if obj else 0xC2)
         return
     
-    # Optimized integer packing
+    # Integer packing (baseline: append-based)
     if isinstance(obj, int):
         ival = obj
-        
-        # Positive fixint: 0x00 - 0x7F
         if 0 <= ival <= 0x7F:
             _append_byte(buf, <uint8_t>ival)
             return
-        
-        # Negative fixint: -32 to -1 (0xE0 - 0xFF)
         if -32 <= ival < 0:
             _append_byte(buf, <uint8_t>((256 + ival) & 0xFF))
             return
-        
-        # Positive integers
         if ival > 0:
             uval = <uint64_t>ival
             if uval <= 0xFF:
@@ -115,8 +109,6 @@ cdef void _msgpack_pack_obj(object obj, bytearray buf) except *:
                 _append_byte(buf, 0xCF)
                 _pack_uint64_be(buf, uval)
             return
-        
-        # Negative integers
         if ival >= -0x80:
             tmp[0] = 0xD0
             tmp[1] = <uint8_t>((256 + ival) & 0xFF)
