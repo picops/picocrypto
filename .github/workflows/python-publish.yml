@@ -23,14 +23,13 @@ jobs:
         with:
           version: "latest"
 
+      # cibuildwheel config (build, before-build, build-frontend) from pyproject.toml [tool.cibuildwheel]
       - name: Build manylinux wheels
         uses: pypa/cibuildwheel@v3.3.1
-        env:
-          CIBW_BUILD: "cp313-* cp314-*"
-          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.13"
-          CIBW_BEFORE_BUILD_LINUX: "command -v dnf >/dev/null && dnf install -y openssl-devel || command -v yum >/dev/null && yum install -y openssl-devel || apk add --no-cache openssl-dev"
         with:
           output-dir: dist
+          # build[uv] uses project [build-system] requires; uv in container for Linux
+          extras: "uv"
 
       - name: Set up Python and build sdist
         run: |
@@ -43,6 +42,7 @@ jobs:
           name: release-dists
           path: dist/
 
+          
   pypi-publish:
     runs-on: ubuntu-latest
     needs:

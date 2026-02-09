@@ -33,3 +33,12 @@ include-package-data = true
 
 [tool.setuptools.dynamic]
 version = { attr = "picocrypto.__about__.__version__" }
+
+[tool.cibuildwheel]
+# Only 3.13 and 3.14 (align with requires-python = ">=3.13"); skip free-threaded variants.
+build = "cp313-* cp314-*"
+skip = "cp313t-* cp314t-*"
+build-frontend = "build[uv]"
+
+[tool.cibuildwheel.linux]
+before-build = "command -v dnf >/dev/null && dnf install -y openssl-devel || command -v yum >/dev/null && yum install -y openssl-devel || apk add --no-cache openssl-dev"
