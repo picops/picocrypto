@@ -2,12 +2,22 @@
 
 import pytest
 
-from picocrypto import (bip137_sign_message, bip137_signed_message_hash,
-                        bip137_verify_message, ed25519_public_key,
-                        ed25519_sign, ed25519_verify,
-                        eip712_hash_agent_message, eip712_hash_full_message,
-                        keccak256, msgpack_pack, privkey_to_address,
-                        privkey_to_pubkey, recover_pubkey, sign_recoverable)
+from picocrypto import (
+    bip137_sign_message,
+    bip137_signed_message_hash,
+    bip137_verify_message,
+    ed25519_public_key,
+    ed25519_sign,
+    ed25519_verify,
+    eip712_hash_agent_message,
+    eip712_hash_full_message,
+    keccak256,
+    msgpack_pack,
+    privkey_to_address,
+    privkey_to_pubkey,
+    recover_pubkey,
+    sign_recoverable,
+)
 
 KECCAK256_EMPTY = bytes.fromhex(
     "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"

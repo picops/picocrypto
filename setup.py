@@ -1,5 +1,4 @@
-from picobuild import (Extension, cythonize, find_packages,
-                       get_cython_build_dir, setup)
+from picobuild import Extension, cythonize, find_packages, get_cython_build_dir, setup
 
 cythonized_extensions = cythonize(
     [

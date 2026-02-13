@@ -3,14 +3,24 @@ Ethereum-style crypto: keccak256, secp256k1, EIP-712. Curves in Cython.
 """
 
 from .__about__ import __version__
-from .curves import (ed25519_public_key, ed25519_sign, ed25519_verify,
-                     privkey_to_address, privkey_to_pubkey, recover_pubkey,
-                     sign_recoverable)
+from .curves import (
+    ed25519_public_key,
+    ed25519_sign,
+    ed25519_verify,
+    privkey_to_address,
+    privkey_to_pubkey,
+    recover_pubkey,
+    sign_recoverable,
+)
 from .hashes import keccak256
 from .serde import msgpack_pack
-from .signing import (bip137_sign_message, bip137_signed_message_hash,
-                      bip137_verify_message, eip712_hash_agent_message,
-                      eip712_hash_full_message)
+from .signing import (
+    bip137_sign_message,
+    bip137_signed_message_hash,
+    bip137_verify_message,
+    eip712_hash_agent_message,
+    eip712_hash_full_message,
+)
 
 __all__: tuple[str, ...] = (
     # About
