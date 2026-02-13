@@ -43,6 +43,7 @@ version = { attr = "picocrypto.__about__.__version__" }
 
 [tool.cibuildwheel]
 # Only 3.13 and 3.14 (align with requires-python = ">=3.13"); skip free-threaded variants.
+enable = ["cpython-freethreading"]
 build = "cp313-* cp314-*"
 skip = "cp313t-* cp314t-*"
 build-frontend = "build[uv]"
