@@ -19,6 +19,7 @@ author = "ckirua"
 # Prefer package version when building from repo (multi-version docs)
 try:
     from picocrypto.__about__ import __version__
+
     release = __version__
     version = ".".join(__version__.split(".")[:2])  # X.Y
 except ImportError:
@@ -49,7 +50,13 @@ html_theme_options = {
 html_show_sphinx = False
 html_show_copyright = True
 html_sidebars = {
-    "**": ["versions.html", "localtoc.html", "relations.html", "sourcelink.html", "searchbox.html"],
+    "**": [
+        "versions.html",
+        "localtoc.html",
+        "relations.html",
+        "sourcelink.html",
+        "searchbox.html",
+    ],
 }
 html_context = {
     "current_version": _current,

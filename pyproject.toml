@@ -3,7 +3,7 @@ requires = [
     "setuptools",
     "wheel",
     "Cython",
-    "picobuild==0.0.5b1"
+    "picobuild>=0.1.0"
 ]
 build-backend = "setuptools.build_meta"
 
@@ -19,7 +19,7 @@ dynamic = ["version"]
 dependencies = [
     "setuptools>=80.9.0",
     "Cython",
-    "picobuild==0.0.5b1"
+    "picobuild>=0.1.0"
 ]
 
 [project.optional-dependencies]

@@ -1,5 +1,4 @@
-from picobuild import (Extension, cythonize, find_packages,
-                       get_cython_build_dir, setup)
+from picobuild import Extension, cythonize, find_packages, get_cython_build_dir, setup
 
 cythonized_extensions = cythonize(
     [
@@ -63,10 +62,7 @@ cythonized_extensions = cythonize(
 
 if __name__ == "__main__":
     setup(
-        name="picocrypto",
-        description="Picocrypto cryptography utilities",
         packages=find_packages(where="src"),
         package_dir={"": "src"},
-        package_data={"picocrypto": ["**/*.pxd", "**/*.pxi", "**/*.pyx"]},
         ext_modules=cythonized_extensions,
     )

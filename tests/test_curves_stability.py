@@ -14,9 +14,16 @@ from __future__ import annotations
 
 import pytest
 
-from picocrypto import (ed25519_public_key, ed25519_sign, ed25519_verify,
-                        keccak256, privkey_to_address, privkey_to_pubkey,
-                        recover_pubkey, sign_recoverable)
+from picocrypto import (
+    ed25519_public_key,
+    ed25519_sign,
+    ed25519_verify,
+    keccak256,
+    privkey_to_address,
+    privkey_to_pubkey,
+    recover_pubkey,
+    sign_recoverable,
+)
 
 # --- secp256k1: locked-in outputs for fixed inputs (captured from current impl) ---
 SECP_PRIV = bytes.fromhex(

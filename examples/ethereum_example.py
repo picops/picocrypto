@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """Example: Ethereum-style crypto (keccak256, secp256k1, EIP-712)."""
 
-from picocrypto import (eip712_hash_full_message, keccak256,
-                        privkey_to_address, sign_recoverable)
+from picocrypto import (
+    eip712_hash_full_message,
+    keccak256,
+    privkey_to_address,
+    sign_recoverable,
+)
 
 privkey = bytes(31) + bytes([1])
 address = privkey_to_address(privkey)
