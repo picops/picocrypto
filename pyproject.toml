@@ -3,13 +3,13 @@ requires = [
     "setuptools",
     "wheel",
     "Cython",
-    "picobuild==0.0.5b1"
+    "picobuild>=0.1.0"
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "picocrypto"
-description = "Picocrypto cryptography utilities"
+description = "CPython Cryptography utilities"
 readme = "README.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
@@ -19,8 +19,15 @@ dynamic = ["version"]
 dependencies = [
     "setuptools>=80.9.0",
     "Cython",
-    "picobuild==0.0.5b1"
+    "picobuild>=0.1.0"
 ]
+
+[project.urls]
+Homepage = "https://github.com/picops/picocrypto"
+Repository = "https://github.com/picops/picocrypto"
+Documentation = "https://picops.github.io/picocrypto/"
+Issues = "https://github.com/picops/picocrypto/issues"
+
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0.0", "sphinx>=7.0.0", "sphinx-rtd-theme>=2.0.0"]
